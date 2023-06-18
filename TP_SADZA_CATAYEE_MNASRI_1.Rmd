@@ -1,0 +1,340 @@
+---
+title: "TP_note"
+author: "SADZA Léa, CATAYEE Britany, MNASRI Sarah"
+date: "2023-04-05"
+output: html_document
+---
+
+##Exercice 1:
+
+
+#1. Aller voir l’aide en ligne de la fonction rnorm afin de savoir ce qui est donné en sorties des fonctions rnorm, dnorm, pnorm et qnorm
+
+?rnorm
+help.start()
+dnorm fct de densité: density
+pnorm fct de répartition: distribution function
+qnorm fct quantile: inverse généralisé de la fonction de répartition
+
+NB: Soit F une fonction: l'inverse généralise F^-1 est donnée par F^-1(t)=inf(xER, F(x)>=t)
+
+
+#2. Sur une même fenêtre graphique, représenter la fonction de densité d’une loi N(0,1), N(−2,1) et N(3,1)
+
+```{r}
+x = seq(-10,10,0.01) #crée un vecteur numérique x qui contient des valeurs allant de -10 à 10 avec un pas de 0.1
+M = max(dnorm(x,0,1), dnorm(x,-2,1), dnorm(x,3,1) ) #donne la valeur maximale qui est atteinte par l'une des courbes
+
+#Évaluation de la fonction de densité d'une loi normale standard aux différents points de x
+plot(x,dnorm(x,0,1), type = 'l', col = 'red', lwd = 3, xlim = c(-10,10), ylim = c(0,M*1.01))
+#on multiplie M par 1.01 pour que le haut de la courbe ne coincide pas avec le haut du graphe, cela permet de laisser de la marge
+
+#Évaluation de la fonction de densité d'une loi normale d'espérance -2 et de variance 1 aux différents points de x
+lines(x,dnorm(x,-2,1),type = 'l', col = 'blue', lwd = 3, xlim = c(-10,10), ylim = c(0,M*1.01)) 
+
+# Évaluation de la fonction de densité d'une loi normale d'espérance 3 et de variance 1 aux différents points de x
+lines(x,dnorm(x,3,1),type = 'l', col = 'green', lwd = 3, xlim = c(-10,10), ylim = c(0,M*1.01)) 
+
+#Légende
+legend(-10,M/2, legend = c('N(0,1)', 'N(-2,1)', 'N(3,1)'), lwd = c(3,3,3), lty = c(1,1,1), col = c('red', 'blue', 'green'))
+#lwd est pour la largeur des lignes
+#lty est pour le type de ligne
+```
+
+
+#3. Sur une même fenêtre graphique, représenter la fonction de densité d’une loi N(0,1), N(0,0.5) et N(0,5)
+
+
+```{r}
+x = seq(-10,10,0.01) #crée un vecteur numérique x qui contient des valeurs allant de -10 à 10 avec un pas de 0.1
+
+M = max(dnorm(x,0,1), dnorm(x,0,sqrt(0.5)), dnorm(x,0,sqrt(5))) #donne la valeur maximale qui est atteinte par l'une des courbes
+
+#Évaluation de la fonction de densité d'une loi normale standard en les points de x
+plot(x,dnorm(x,0,1), type = 'l', col = 'red', lwd = 3, xlim = c(-10,10), ylim = c(0,M*1.01)) 
+
+#Évaluation de la fonction de densité d'une loi normale d'espérance 0 et de variance 0.05 en les points de x
+lines(x,dnorm(x,0,sqrt(0.5)),type = 'l', col = 'blue', lwd = 3) 
+
+#Évaluation de la fonction de densité d'une loi normale d'espérance 0 et de variance 5 en les points de x
+lines(x,dnorm(x,0,sqrt(5)),type = 'l', col = 'green', lwd = 3) 
+
+# Légende 
+legend(-10,0.3, legend = c('N(0,1)', 'N(0,0.05)', 'N(0,5)'), lwd = c(3,3,3), lty = c(1,1,1), col = c('red', 'blue', 'green')) 
+```
+
+##Exercice 2:
+
+#1. Loi de FX(X)
+#(a) A l’aide du logiciel R, simulez 50 000 observations d’une loi E(4).
+
+```{r}
+lambda = 4 #paramètre
+n = 50000 #nb d'observations
+y = rexp(n,lambda) #loi exponentielle
+M = max(y) #valeur maximale de cette loi
+limi = c(0,0.05,0.1,0.2,0.4,0.6,0.8,1.2,M*1.01) #intervalles fixés
+H = hist(y, breaks = limi, freq = FALSE) #fait un histogramme avec les densités
+```
+
+#(b) Calculer la fonction de répartition en chacun des points simulés.
+
+```{r}
+z = pexp(y,lambda) #Fonction de répartition pour la loi exponentielle
+```
+
+#(c) Que pouvez-vous dire quant à la loi de ces nouvelles observations?
+
+Il s'agit d'une variable continue, si l'on trace l'histogramme des valeurs, nous pourrons ainsi déterminer sa loi.
+
+```{r}
+h = hist(z, freq=FALSE)
+```
+C'est donc une loi uniforme.
+
+#2. Méthode d’inversion
+#(a) A l’aide de la méthode d’inversion de la fonction de répartition, simulez 10 000 observations d’une loi E(7).
+
+#b) Faire une représentation graphique de ces données et y superposez la fonction de densité d’une loi E(7).
+
+Fonction de répartition : Fx(t) = 1 - exp(-7t) pour t>=0
+                                  = 0 sinon
+
+Pour calculer l'inverse de la fonction de répartition, on résout Fx(t) = x
+et on trouve t= -1/7*ln(1-x) (calcul sur feuille)
+
+Posons Y=-1/7*ln(1-U)
+Considérons Z=-1/7* ln(U).
+Z et Y ont la même loi car U suit une loi uniforme sur [0,1] et 1-U également.
+
+```{r}
+U = runif(10000) #génère des nombres aléatoires à partir d'une distribution uniforme
+Z = -1/7*log(U) # Z suit également une loi uniforme
+lambda = 7 #paramètre
+H = hist(z,plot=FALSE) #crée l'histogramme
+l = max(H$breaks) #prend la valeur de la plus grande
+x = seq(0,l,0.01) #on commence à 0 car une loi de densité est supérieur ou égal à 0
+z = dexp(x,lambda) #loi exponentielle de paramètre lambda = 7
+M = max(z,H$density) #valeur maximale de la densité pour la loi exponentielle de paramètre lambda = 7
+
+#Affichage de l'histogramme
+hist(Z,freq=FALSE,xlim=c(0,l*1.01),ylim=(c(0,M*1.01)))
+par(new=TRUE) #pour superposer une fonction sur l'histogramme
+
+# Tracé de la fonction de densité d'une loi exponentielle de paramètre lambda = 7
+plot(x,z,type = 'l',col='red',lwd=3,ylab='',xlim=c(0,l*1.01),ylim=c(0,M*1.01)) 
+```
+
+##Exercice 3:
+
+#1. sur feuille
+#2. sur feuille
+
+#3.
+On doit utiliser la méthode de rejet pour simuler une observation selon la densité g.
+On a  g(z) = exp(-|z|)/2 , c=1 et c*g qui satisfasse la condition f(z) ≤ c.g(z) .
+On peut réécrire la condition c.u.g(z) <= f(z) sous la forme u < =exp(-|z|)/2.
+ Et cette condition est équivalente à z = t.y, où y est une observation d'une loi exponentielle de paramètre 1 et t est une observation d'une loi uniforme sur {-1, 1}.
+Et donc,  pour simuler une observation selon la densité g, il suffit  de considérer z = t.y avec y une observation d’une loi exponentielle de paramètre 1 et t une observation d’une loi uniforme sur {−1; 1}.
+
+#4. Utiliser le tout pour simuler 1000 réalisations d’une loi normale standard
+
+```{r}
+#on utilise une boucle while pour générer n échantillons. 
+#on crée un vecteur echantillons qu'on initialise avec numeric(n) avant d'entrer dans la boucle, pour s'assurer que chaque echantillons soit bien soit bien stocker dans le vecteur.
+n<-1000
+i<-1
+echantillons<-numeric(n) #initialisation du vecteur 
+while(i<=n){
+y<- rexp(1,1) #On tire une observation y selon une loi exponentielle de paramètre 1.
+t<- sample(c(-1, 1),1,replace = TRUE) #On tire une observation t selon une loi uniforme sur {-1,1}.
+z<- t*y #On calcule z = t.y.
+u<- runif(1)#On tire une observation u selon une loi uniforme sur [0,1].
+c <- sqrt(2*exp(1)/pi) #choix de c
+g<-exp(-abs(z))/2 #choix de g
+f<-exp(-z^2/2)/2*pi #choix de f
+#Si u < f(z)/(c.g(z)), on garde z, sinon on rejette z et on retourne à l'étape 2.
+if(u < f/(c*g) ){
+  echantillons[i]<-z #on stocke l'echantillon proposé si il est bon
+  i<-i+1
+}
+}
+
+```
+
+#5. Utiliser une représentation graphique afin de confirmer la méthode.
+
+```{r}
+#on trace un histogramme de ces échantillons et on superpose la courbe de la densité de la loi normale standard.
+hist(echantillons, freq=FALSE, breaks=30, main="Histogramme de la loi normale simulée")
+x <- seq(-5, 5, 0.01)
+lines(x, dnorm(x), col="red", lwd=2)
+
+```
+
+##Exercice 4:
+
+#1. Faire une représentation de la loi de y pour n=2, n=20 puis n=100.
+Que constatez-vous?
+
+```{r}
+n = 2 #on fixe la valeur pour n=2
+x = seq(-10,10,0.01) #crée un vecteur numérique x qui contient des valeurs allant de -10 à 10 avec un pas de 0.1
+Y=c() #on initialise un vecteur
+for (i in 1:length(x)){
+  Y[i]= sqrt(n)*(mean(rexp(n,lambda))-1/2)/(1/2) #on se sert de la fonction mean (moyenne) pour calculer
+}
+
+hist(Y, freq = FALSE) #on affiche l'histogramme
+lines(x,dnorm(x), col = "blue")
+```
+```{r}
+n = 20 #on fixe la valeur pour n=20
+x = seq(-10,10,0.01) #crée un vecteur numérique x qui contient des valeurs allant de -10 à 10 avec un pas de 0.1
+Y=c() #on initialise un vecteur
+for (i in 1:length(x)){
+  Y[i]= sqrt(n)*(mean(rexp(n,lambda))-1/2)/(1/2) #on se sert de la fonction mean (moyenne) pour calculer
+}
+
+hist(Y, freq = FALSE) #on affiche l'histogramme
+
+#Évaluation de la fonction de densité d'une loi normale d'espérance en les points de x
+lines(x,dnorm(x), col = "blue")
+```
+
+```{r}
+n = 100 #on fixe la valeur pour n=100
+x = seq(-10,10,0.01) #crée un vecteur numérique x qui contient des valeurs allant de -10 à 10 avec un pas de 0.1
+Y=c() #on initialise un vecteur
+for (i in 1:length(x)){
+  Y[i]= sqrt(n)*(mean(rexp(n,lambda))-1/2)/(1/2) #on se sert de la fonction mean (moyenne) pour calculer
+}
+
+hist(Y, freq = FALSE) #on affiche l'histogramme
+lines(x,dnorm(x), col = "blue")
+```
+
+On remarque lors de l'évaluation de la fonction de densité d'une loi normale en les points de x que plus n est grand, plus celle-ci se rapproche de l'axe des abscisses.
+
+#2.
+
+```{r}
+n = 2 #on fixe n
+x = seq(-10,10,0.01) #crée un vecteur numérique x qui contient des valeurs allant de -10 à 10 avec un pas de 0.1
+Y=c() #on initialise un vecteur
+for (i in 1:length(x)){
+  Y[i] = sqrt(n)*((sum(runif(n,0,2))/n)-1)/sqrt(1/3) #on a remplacé la loi exp par la loi uniforme sur [0,2]
+}
+
+m=max(Y) #donne la valeur maximale
+hist(Y, freq = FALSE)
+lines(x,dnorm(x), col = "green",ylim=c(0,m*1.1)) 
+```
+```{r}
+n = 20 #on fixe n
+x = seq(-10,10,0.01) #crée un vecteur numérique x qui contient des valeurs allant de -10 à 10 avec un pas de 0.1
+Y=c() #on initialise un vecteur
+for (i in 1:length(x)){
+  Y[i] = sqrt(n)*((sum(runif(n,0,2))/n)-1)/sqrt(1/3) #on a remplacé la loi exp par la loi uniforme sur [0,2]
+}
+
+m=max(Y) #donne la valeur maximale
+hist(Y, freq = FALSE)
+lines(x,dnorm(x), col = "green",ylim=c(0,m*1.1)) 
+```
+
+```{r}
+n =100 #on fixe n
+x = seq(-10,10,0.01) #crée un vecteur numérique x qui contient des valeurs allant de -10 à 10 avec un pas de 0.1
+Y=c() #on initialise un vecteur
+for (i in 1:length(x)){
+  Y[i] = sqrt(n)*((sum(runif(n,0,2))/n)-1)/sqrt(1/3) #on a remplacé la loi exp par la loi uniforme sur [0,2]
+}
+
+m=max(Y) #donne la valeur maximale
+hist(Y, freq = FALSE)
+lines(x,dnorm(x), col = "green",ylim=c(0,m*1.1)) 
+```
+On remarque que l'histogramme donné ressemble à une densité de loi normale centrée réduite.
+
+#3. Aurait-on pu travailler directement sur X̄n?
+
+Nous aurions en effet pu travailler directement sur X-n.
+
+```{r}
+n = 100
+lambda = 2
+
+Xi = rexp(n, lambda) #variables aléatoires Xi
+xnbar = mean(Xi)
+
+x = seq(-10,10,0.01)
+
+densite_xnbar = dnorm(x, mean = lambda)
+
+plot(x, densite_xnbar, type = "l",xlab = "xnbar", ylab = "densité",main = "Graphe de la densité de xnbar")
+```
+
+##Exercice 5:
+
+#1. Que signifie concrètement l’événement “la bille dans le compartiment k” en termes de
+#parcours de la bille depuis le sommet?
+
+“la bille dans le compartiment k" signifie en termes de parcours de la bille que la bille est allée k fois vers la droite et n-k vers la gauche.
+
+#2. Ecrire un programme qui permet de visualiser l’évolution des effectifs de chaque compartiment (lors de la chute de billes les unes après les autres).
+
+```{r}
+nbrRangees <- 10 #on fixe le nombre de rangées
+nbrCompartiments <-nbrRangees + 1 #le nombre de compartiments est égal au nombre de rangées +1
+p<- 0.5 #on fixe la probabilité d'aller à gauche
+nbrBille <- 4000
+effectifDansCompartiments <- rep(0,nbrCompartiments) #on crée un vecteur de longueur "nbrCompartiments" contenant des zéros.
+
+for (i in 1:nbrBille) {
+  chemin <- 1 #on commence la rangée à 1
+  for (j in 1:nbrRangees) {
+    bin<-rbinom(nbrRangees,1,p) #c'est une loi binomiale avec nbrRangees (nombre d'observations), 1 (nombre d'essais) et p (probabilité d'aller à gauche)
+    if (bin[j] == 1) { 
+      chemin <- chemin + 1  #Si on a un succès dans l'experience de bernouilli au rang j alors la bille va à gauche
+    }
+  }
+  effectifDansCompartiments[chemin] <- effectifDansCompartiments[chemin] + 1
+}
+
+#on affiche l'histogramme des éffectifs dans chaque compartiment
+barplot(effectifDansCompartiments, main = "Evolution des effectifs dans chaque compartiment",
+        xlab = "Compartiments", ylab = "Effectifs")
+```
+
+
+#3. Comment estimer la probabilité associée à chaque compartiment lorsque p = 1/2?
+
+```{r}
+nbrRangees <- 10 #on fixe le nombre de rangées
+nbrCompartiments <-nbrRangees + 1 #le nombre de compartiments est égal au nombre de rangées +1
+p<- 0.5 #on fixe la probabilité d'aller à gauche
+nbrBille <- 4000
+effectifDansCompartiments <- rep(0,nbrCompartiments) #on crée un vecteur de longueur "nbrCompartiments" contenant des zéros.
+
+for (i in 1:nbrBille) {
+  chemin <- 1 #on commence la rangée à 1
+  for (j in 1:nbrRangees) {
+    bin<-rbinom(nbrRangees,1,p) #c'est une loi binomiale avec nbrRangees (nombre d'observations), 1 (nombre d'essais) et p (probabilité d'aller à gauche)
+    if (bin[j] == 1) { 
+      chemin <- chemin + 1  #Si on a un succès dans l'experience de bernouilli au rang j alors la bille va à gauche
+    }
+  }
+  effectifDansCompartiments[chemin] <- effectifDansCompartiments[chemin] + 1
+}
+
+#on calcule la proba associée pour que la bille aille dans chaque compartiment c'est-à-dire qu'on divise le nombre de chaque bille dans chaque compartiments et on le divise par le nombre total de billes
+probaCompartiment <- effectifDansCompartiments/nbrBille
+probaCompartiment
+```
+
+#4. Faire varier p. Expliquer le résultat obtenu sur les estimations des probabilités.
+
+Lorsque l'on fait varier la valeur de p, on remarque que plus p est petit, 
+  -plus les compartiments de gauches sont remplis.
+  -plus p est grand, plus les compartiments de droites sont remplis.
